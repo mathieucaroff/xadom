@@ -1,6 +1,7 @@
 {
     "include": ["src"],
     "compilerOptions": {
+        "rootDir": "src",
         "outDir": "dist",
         "types": ["intern"],
         "target": "es2019",
