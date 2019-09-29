@@ -1,0 +1,16 @@
+{
+    "include": ["src"],
+    "compilerOptions": {
+        "outDir": "dist",
+        "types": ["intern"],
+        "target": "es2019",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "declaration": true,
+        "declarationMap": true,
+        "incremental": true,
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "strict": true
+    }
+}
