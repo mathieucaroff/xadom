@@ -9,7 +9,7 @@ export interface WrapperFunc<T> {
       type: K,
       listener: (this: Element, ev: ElementEventMap[K]) => any,
       option?: boolean | AddEventListenerOptions,
-   ) => void
+   ) => { remove: () => void }
 }
 
 export const wrapperFunc = <T extends Element>(
