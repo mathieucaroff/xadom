@@ -1,6 +1,13 @@
+/**
+ * xa.ts
+ *
+ * entry point for libraries
+ */
+
 import { WrapperFunc, wrapperFunc } from './elem/wrapperFunc'
 import { WrapperProp, wrapperProp } from './elem/wrapperProp'
 import { createXaUtil, XaUtil } from './util/xaUtil'
+import { XaFuture } from './future'
 
 export interface XaProp {
    document: Document
@@ -21,20 +28,31 @@ export type Xa = XaUtil &
       html: XaElement<HTMLElement>
    }
 
+/**
+ *
+ * @param prop.document The document instance of the page
+ * @returns An Xa instance, wrapping the document
+ */
 export const createXa = (prop: XaProp): Xa => {
-   let { document: d } = prop
+   let { document: doc } = prop
 
-   let xaUtil = createXaUtil(d)
+   let xaUtil = createXaUtil(doc)
 
    let wrap = <T extends Element>(el: T): XaElement<T> => {
       if ('$' in el) {
-         return el as any
+         return el as XaElement<T>
+      }
+
+      let future: XaFuture<T> = {
+         get self() {
+            return wrappedElement
+         },
       }
 
       let elWrapperProp = wrapperProp(el, xa)
-      let elWrapperFunc = wrapperFunc(el, xa)
+      let elWrapperFunc = wrapperFunc(el, xa, future)
 
-      return Object.setPrototypeOf(
+      let wrappedElement: XaElement<T> = Object.setPrototypeOf(
          {
             ...elWrapperFunc,
             ...elWrapperProp,
@@ -42,18 +60,20 @@ export const createXa = (prop: XaProp): Xa => {
          },
          el,
       )
+
+      return wrappedElement
    }
 
    let xa: Xa = Object.setPrototypeOf(
       {
          get body() {
-            return wrap(d.body)
+            return wrap(doc.body)
          },
          get html() {
-            return wrap(d.documentElement)
+            return wrap(doc.documentElement)
          },
          get head() {
-            return wrap(d.head)
+            return wrap(doc.head)
          },
          ...xaUtil,
 

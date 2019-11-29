@@ -1,4 +1,17 @@
+/**
+ * xaUtil.ts
+ *
+ * Utilitary functions provided to the user
+ */
+
 export const createXaUtil = (d: Document) => {
+   /**
+    * create an HTML Element
+    *
+    * @param name The html name of the element to create
+    * @param attribute An object associating keys to values for the created element
+    * @param children An array of children elements
+    */
    let create = <
       K extends keyof (HTMLElementTagNameMap | SVGElementTagNameMap)
    >(
@@ -23,19 +36,8 @@ export const createXaUtil = (d: Document) => {
       return elem
    }
 
-   let intoTextNode = (child: Node | string) => {
-      let node: Node
-      if (typeof child === 'string') {
-         node = d.createTextNode(child)
-      } else {
-         node = child
-      }
-      return node
-   }
-
    let xaUtil = {
       create,
-      intoTextNode,
    }
 
    return xaUtil

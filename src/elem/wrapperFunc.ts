@@ -1,10 +1,15 @@
+import { XaFuture } from '../future'
 import { Xa, XaElement } from '../xa'
 
-export interface WrapperFunc<T> {
+/**
+ * See the README file for documentation
+ */
+export interface WrapperFunc<T extends Element> {
    $: <R extends Element>(selector: string) => XaElement<R> | undefined
    $$: <R extends Element>(selector: string) => XaElement<R>[]
-   append: <T extends Node | string>(child: T) => T
-   clone: (deep: boolean) => T
+   append: <TN extends Node>(child: TN) => XaElement<T>
+   appendText: (text: string) => XaElement<T>
+   clone: (deep: boolean) => XaElement<T>
    on: <K extends keyof ElementEventMap>(
       type: K,
       listener: (this: Element, ev: ElementEventMap[K]) => any,
@@ -12,23 +17,40 @@ export interface WrapperFunc<T> {
    ) => { remove: () => void }
 }
 
+/**
+ *
+ * @param el The element to wrap
+ * @param xa The xa instance. It is used to wrap children elements when read
+ *
+ * @returns An object containing the methods provided by the wrapper
+ */
 export const wrapperFunc = <T extends Element>(
    el: T,
    xa: Xa,
+   future: XaFuture<T>,
 ): WrapperFunc<T> => {
-   let wrapperFunc: WrapperFunc<T> = {
+   let elWrapperFunc: WrapperFunc<T> = {
       $: <R extends Element>(selector: string): XaElement<R> | undefined => {
          let result = el.querySelector<R>(selector)
          return result !== null ? xa.wrap(result) : undefined
       },
+
       $$: <R extends Element>(selector: string): XaElement<R>[] => {
          return Array.from(el.querySelectorAll<R>(selector)).map(xa.wrap)
       },
-      append: <T extends Node | string>(child: T): T => {
-         el.appendChild(xa.intoTextNode(child))
-         return child
+
+      append: <TN extends Node>(child: TN): XaElement<T> => {
+         el.appendChild(child)
+         return future.self
       },
-      clone: (deep: boolean): T => xa.wrap(el.cloneNode(deep) as T),
+
+      appendText: (text: string): XaElement<T> => {
+         el.appendChild(xa.createTextNode(text))
+         return future.self
+      },
+
+      clone: (deep: boolean): XaElement<T> => xa.wrap(el.cloneNode(deep) as T),
+
       on: <K extends keyof ElementEventMap>(
          type: K,
          listener: (this: Element, ev: ElementEventMap[K]) => any,
@@ -41,5 +63,6 @@ export const wrapperFunc = <T extends Element>(
          return { remove }
       },
    }
-   return wrapperFunc
+
+   return elWrapperFunc
 }
